@@ -1,5 +1,5 @@
-PLUGIN_NAME = originnexus/glusterfs-plugin
-PLUGIN_TAG ?= dev
+PLUGIN_NAME = dodslaser/glusterfs-plugin
+PLUGIN_TAG ?= arm64
 
 all: clean rootfs create
 
@@ -9,7 +9,7 @@ clean:
 
 rootfs:
 	@echo "### docker build rootfs image"
-	@docker build -q -t ${PLUGIN_NAME}:rootfs .
+	@docker build -t ${PLUGIN_NAME}:rootfs .
 	@echo "### create rootfs directory in ./plugin/rootfs"
 	@mkdir -p ./plugin/rootfs
 	@docker create --name gluster-tmp ${PLUGIN_NAME}:rootfs

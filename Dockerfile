@@ -13,7 +13,7 @@ RUN apt update && \
     apt autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=builder /go/src/docker-volume-glusterfs/docker-volume-glusterfs /
-ADD https://github.com/krallin/tini/releases/download/v0.18.0/tini /tini
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-arm64 /tini
 RUN chmod +x /tini
 
 CMD ["/tini", "--", "docker-volume-glusterfs"]
