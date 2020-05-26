@@ -1,4 +1,4 @@
-package glusterfsdriver
+package main
 
 import (
 	"reflect"

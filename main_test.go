@@ -20,11 +20,15 @@ func TestNewGlusterfsDriverUnknownLoglevel(t *testing.T) {
 func TestNewGlusterfsDriverDefaultLoglevel(t *testing.T) {
 	root := "/myroot"
 	os.Setenv("LOGLEVEL", "")
-	_, err := newGlusterfsDriver(root)
+	d, err := newGlusterfsDriver(root)
 
 	if err != nil {
 		t.Error("LOGLEVEL '' should not return error")
 		return
+	}
+
+	if d.loglevel != "WARNING" {
+		t.Error("LOGLEVEL '' should set loglevel to 'WARNING'")
 	}
 
 	if l := logrus.GetLevel(); l != logrus.WarnLevel {
@@ -50,7 +54,7 @@ func TestNewGlusterfsDriverLogruslevel(t *testing.T) {
 
 	for _, c := range cases {
 		os.Setenv("LOGLEVEL", c.envLevel)
-		_, err := newGlusterfsDriver(root)
+		d, err := newGlusterfsDriver(root)
 
 		if err != nil {
 			t.Errorf("LOGLEVEL '%v' should not return error", c.envLevel)
@@ -59,6 +63,10 @@ func TestNewGlusterfsDriverLogruslevel(t *testing.T) {
 
 		if l := logrus.GetLevel(); l != c.logrusLevel {
 			t.Errorf("LOGLEVEL '%v' should set logrus level to '%v', not '%v'", c.envLevel, c.logrusLevel, l)
+		}
+
+		if d.loglevel != c.envLevel {
+			t.Errorf("LOGLEVEL '%v' should set logLevel to '%v'", c.envLevel, c.envLevel)
 		}
 	}
 }
@@ -88,16 +96,15 @@ func TestOPTIONvarSetsOptions(t *testing.T) {
 	if err != nil {
 		t.Error("Correct options should not raise error")
 	}
-	options := d.GetOptions()
-	if !reflect.DeepEqual(options, map[string]string{
+	if !reflect.DeepEqual(d.options, map[string]string{
 		"acl":       "",
 		"log-level": "INFO",
 	}) {
 		t.Errorf(
 			"Driver options not set correctly from env var OPTIONS='%v': %#v",
-			option_str, options)
+			option_str, d.options)
 	}
-	if d.DedicatesMounts() {
+	if d.dedicatedMounts {
 		t.Error("Dedicated mounts per docker volume when it was not set in options")
 	}
 }
@@ -111,16 +118,15 @@ func TestOPTIONdedicatedMount(t *testing.T) {
 	if err != nil {
 		t.Error("Correct options should not raise error")
 	}
-	options := d.GetOptions()
-	if !reflect.DeepEqual(options, map[string]string{
+	if !reflect.DeepEqual(d.options, map[string]string{
 		"acl":       "",
 		"log-level": "INFO",
 	}) {
 		t.Errorf(
 			"Driver options not set correctly from env var OPTIONS='%v': %#v",
-			option_str, options)
+			option_str, d.options)
 	}
-	if !d.DedicatesMounts() {
+	if !d.dedicatedMounts {
 		t.Error(
 			"Dedicated mounts was not activated by 'dedicated-mounts' option")
 	}
